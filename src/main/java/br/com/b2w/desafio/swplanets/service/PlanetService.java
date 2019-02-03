@@ -54,19 +54,31 @@ public class PlanetService {
         return planetsRepository.findAllByName(nome);
     }
 
-    public void save(Planet planet){
+    public Planet save(Planet planet){
         logger.debug("[INFO] Saving planet {}", planet);
-        planetsRepository.save(planet);
+        return planetsRepository.save(planet);
     }
 
-    public void delete(ObjectId id){
-        logger.debug("[INFO] Deleting planet with _id {}", id);
-        planetsRepository.deleteById(id.toHexString());
+    public boolean delete(ObjectId id){
+        try {
+            logger.debug("[INFO] Deleting planet with _id {}", id);
+            planetsRepository.deleteById(id.toHexString());
+        } catch (Exception e) {
+            logger.error("[ERROR] Error on attempting to delete planet with _id {}", id);
+            return false;
+        }
+        return true;
     }
 
-    public void deleteAll(){
-        logger.debug("[INFO] Deleting all planets");
-        planetsRepository.deleteAll();
+    public boolean deleteAll(){
+        try {
+            logger.debug("[INFO] Deleting all planets");
+            planetsRepository.deleteAll();
+        } catch (Exception e) {
+            logger.error("[ERROR] Error attempting to delete all planets.");
+            return false;
+        }
+        return true;
     }
 
 //    public void updatePlanet(Planet planet){

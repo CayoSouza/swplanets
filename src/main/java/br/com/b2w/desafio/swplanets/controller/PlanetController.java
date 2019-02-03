@@ -70,14 +70,14 @@ public class PlanetController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getPlanetById(@PathVariable ObjectId id) {
-        Planet planetById = planetService.getById(id);
+        Planet planet = planetService.getById(id);
 
-        if(planetById == null) {
-            return new ResponseEntity<Response>(new Response("Nenhum planeta encontrado com o id: " + id),
-                    HttpStatus.NOT_FOUND);
+        ResponseEntity<Response> responseResponseEntity = checkPlanetIdAndReturnNotFound(id, planet);
+        if (responseResponseEntity != null){
+            return responseResponseEntity;
         }
 
-        return new ResponseEntity<>(planetById, HttpStatus.OK);
+        return new ResponseEntity<>(planet, HttpStatus.OK);
     }
 
     @PostMapping
@@ -87,27 +87,66 @@ public class PlanetController {
         planetService.save(planet);
 
         headers = new HttpHeaders();
-        uriComponents = uriComponentsBuilder.path("/planetas/id/{id}").buildAndExpand(id);
+        uriComponents = uriComponentsBuilder.path("/planetas/{id}").buildAndExpand(id);
         headers.setLocation(uriComponents.toUri());
 
         return new ResponseEntity<>(planet, headers, HttpStatus.CREATED);
     }
 
-    //TODO: RESTFULL
     @PutMapping("/id/{id}")
-    public void modifyPlanetByObjectId(@PathVariable ObjectId id, @Valid @RequestBody Planet planet) {
+    public ResponseEntity<?> modifyPlanetByObjectId(@PathVariable ObjectId id, @Valid @RequestBody Planet planet) {
         planet.set_id(id);
-        planetService.save(planet);
+
+        Planet p = planetService.getById(id);
+
+        ResponseEntity<Response> responseResponseEntity = checkPlanetIdAndReturnNotFound(id, p);
+        if (responseResponseEntity != null){
+            return responseResponseEntity;
+        }
+
+        p = planetService.save(planet);
+
+        if (p == null) {
+            return new ResponseEntity<Response>(new Response("Erro na atualizacao do planeta " + planet),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return ResponseEntity.ok(p);
     }
 
     @DeleteMapping("/id/{id}")
-    public void deletePlanetByObjectId(@PathVariable ObjectId id) {
-        planetService.delete(id);
+    public ResponseEntity<?> deletePlanetByObjectId(@PathVariable ObjectId id) {
+        Planet planet = planetService.getById(id);
+
+        ResponseEntity<Response> responseResponseEntity = checkPlanetIdAndReturnNotFound(id, planet);
+        if (responseResponseEntity != null){
+            return responseResponseEntity;
+        }
+
+        if(planetService.delete(id)){
+            ResponseEntity.ok().body(new Response(String.format("Planeta %s deletado com sucesso.", id)));
+        }
+
+        return new ResponseEntity<Response>(new Response("Erro ao deletar o planeta " + id),
+                HttpStatus.INTERNAL_SERVER_ERROR);
+
     }
 
     @DeleteMapping
-    public void deleteAllPlanets() {
-        planetService.deleteAll();
+    public ResponseEntity<Response> deleteAllPlanets() {
+        if (planetService.deleteAll()){
+                return ResponseEntity.ok().body(new Response("Todos planetas foram deletados do universo!"));
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response("Algum milagre aconteceu e todos os planetas nao foram deletados!"));
     }
 
+
+    private ResponseEntity<Response> checkPlanetIdAndReturnNotFound(@PathVariable ObjectId id, Planet planet) {
+        if (planet == null) {
+            return new ResponseEntity<Response>(new Response("Nenhum planeta encontrado com o id: " + id),
+                    HttpStatus.NOT_FOUND);
+        }
+        return null;
+    }
 }
