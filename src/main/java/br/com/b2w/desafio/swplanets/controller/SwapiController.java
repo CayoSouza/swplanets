@@ -11,8 +11,13 @@ public class SwapiController {
     @Autowired
     SwapiService swapiService;
 
-    @GetMapping("/swapi")
+    @GetMapping("/swapi/consumir")
     public Swapi consumeSwapi(){
-        return swapiService.getPlanets();
+        return swapiService.getPlanetsFromSwapi();
+    }
+
+    @GetMapping("/swapi/importar")
+    public boolean importaSwapi(){
+        return swapiService.importToDatabase();
     }
 }

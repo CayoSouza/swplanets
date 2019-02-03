@@ -1,5 +1,7 @@
 package br.com.b2w.desafio.swplanets.model;
 
+import br.com.b2w.desafio.swplanets.model.dto.SwapiDTO;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -7,12 +9,13 @@ import lombok.ToString;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Document(collection = "planets")
 @Data
-@ToString
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Planet {
 
     @Id
@@ -22,7 +25,19 @@ public class Planet {
     private String name;
     private String climate;
     private String terrain;
-    private List<Integer> films;
+    private List<String> films;
+
+    public Planet(){
+
+    }
+
+    public Planet(SwapiDTO swapiDTO){
+        set_id(ObjectId.get());
+        setName(swapiDTO.getName());
+        setClimate(swapiDTO.getClimate());
+        setTerrain(swapiDTO.getTerrain());
+        setFilms(swapiDTO.getFilms());
+    }
 
     public String get_id() {
         return _id.toHexString();

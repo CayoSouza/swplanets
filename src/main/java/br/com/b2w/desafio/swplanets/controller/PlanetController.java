@@ -51,6 +51,11 @@ public class PlanetController {
         planetService.delete(id);
     }
 
+    @DeleteMapping
+    public void deleteAllPlanets() {
+        planetService.deleteAll();
+    }
+
 //    @PutMapping(value = "/{id}")
 //    public void modifyPlanetById(@PathVariable("id") String id, @Valid @RequestBody Planet planet) {
 //        planet.setId(id);

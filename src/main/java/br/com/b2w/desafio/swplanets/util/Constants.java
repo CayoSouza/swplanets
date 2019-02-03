@@ -6,6 +6,6 @@ public class Constants {
 
     }
 
-    public static final String SWAPI_BASE_URL = "https://swapi.co/";
-    public static final String SWAPI_PLANETS = SWAPI_BASE_URL + "/planets";
+    public static final String SWAPI_BASE_URL = "https://swapi.co/api/";
+    public static final String SWAPI_PLANETS = SWAPI_BASE_URL + "planets/";
 }

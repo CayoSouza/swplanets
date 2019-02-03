@@ -44,6 +44,11 @@ public class PlanetService {
         planetsRepository.deleteById(id.toHexString());
     }
 
+    public void deleteAll(){
+        logger.debug("[INFO] Deleting all planets");
+        planetsRepository.deleteAll();
+    }
+
 //    public void updatePlanet(Planet planet){
 //        logger.debug("[INFO] Updating planet {}", planet);
 //        planetsRepository.save(planet);
