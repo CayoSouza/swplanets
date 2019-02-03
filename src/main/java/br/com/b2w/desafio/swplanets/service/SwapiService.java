@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.stream.Collectors;
+
 @Service
 public class SwapiService {
     @Autowired
@@ -53,6 +55,10 @@ public class SwapiService {
 
     private void importPlanetsFromPage(Swapi result) {
         for (SwapiDTO p : result.getResults()) {
+            p.setFilms(p.getFilms().stream()
+                    .map(f -> f.replaceAll("[^0-9]", ""))
+                    .collect(Collectors.toList()));
+            p.setFilmsApparitions(p.getFilms().size());
             Planet planet = new Planet(p);
             logger.debug("[INFO] Importing planet {}", planet);
             planetService.save(planet);

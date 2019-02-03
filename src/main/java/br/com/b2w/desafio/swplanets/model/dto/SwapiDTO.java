@@ -11,5 +11,6 @@ public class SwapiDTO {
     private String name;
     private String climate;
     private String terrain;
+    private int filmsApparitions;
     private List<String> films;
 }

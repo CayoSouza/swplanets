@@ -1,8 +1,11 @@
 package br.com.b2w.desafio.swplanets.controller;
 
+import br.com.b2w.desafio.swplanets.model.Response;
 import br.com.b2w.desafio.swplanets.model.Swapi;
 import br.com.b2w.desafio.swplanets.service.SwapiService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +20,9 @@ public class SwapiController {
     }
 
     @GetMapping("/swapi/importar")
-    public boolean importaSwapi(){
-        return swapiService.importToDatabase();
+    public ResponseEntity<Response> importaSwapi(){
+        return swapiService.importToDatabase() ?
+                ResponseEntity.ok(new Response("Importado com sucesso."))
+                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response("Erro na importacao."));
     }
 }
