@@ -12,9 +12,9 @@ import java.util.Optional;
 
 public interface PlanetsRepository extends MongoRepository<Planet, String> {
 
-    Planet findBy_id(ObjectId _id);
+    Optional<Planet> findBy_id(ObjectId _id);
 
-    List<Planet> findAllByName(String name);
+    Optional<List<Planet>> findAllByName(String name);
 
     Page<Planet> findAllBy(PageRequest pageRequest);
 }

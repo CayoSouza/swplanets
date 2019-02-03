@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PlanetService {
@@ -42,12 +43,12 @@ public class PlanetService {
         return planetsRepository.findAll(pageable);
     }
 
-    public Planet getById(ObjectId id){
+    public Optional<Planet> getById(ObjectId id){
         logger.debug("[INFO] Returning planet with _id {}", id);
         return planetsRepository.findBy_id(id);
     }
 
-    public List<Planet> getAllByName(String nome){
+    public Optional<List<Planet>> getAllByName(String nome){
         logger.debug("[INFO] Returning planets with name {}", nome);
         return planetsRepository.findAllByName(nome);
     }

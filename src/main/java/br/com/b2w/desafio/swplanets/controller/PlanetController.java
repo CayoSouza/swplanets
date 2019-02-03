@@ -15,6 +15,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/planetas")
@@ -53,14 +54,14 @@ public class PlanetController {
     }
 
     public ResponseEntity<?> getPlanetByName(@RequestParam String nome) {
-        List<Planet> planetsByName = planetService.getAllByName(nome);
+        Optional<List<Planet>> planetsByName = planetService.getAllByName(nome);
 
-        if(planetsByName.isEmpty()){
+        if(planetsByName.get().isEmpty()){
             return new ResponseEntity<Response>(new Response("Nenhum planeta encontrado com o nome: " + nome),
                     HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(planetsByName, HttpStatus.OK);
+        return new ResponseEntity<>(planetsByName.get(), HttpStatus.OK);
     }
 
     private ResponseEntity<?> getPlanetByPageAndLimit(int page, int size, String sort) {
@@ -70,14 +71,13 @@ public class PlanetController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getPlanetById(@PathVariable ObjectId id) {
-        Planet planet = planetService.getById(id);
+        Optional<Planet> planet = planetService.getById(id);
 
-        ResponseEntity<Response> responseResponseEntity = checkPlanetIdAndReturnNotFound(id, planet);
-        if (responseResponseEntity != null){
-            return responseResponseEntity;
+        if (!planet.isPresent()){
+            return ResponseEntity.badRequest().body(new Response("Nenhum planeta encontrado com o id: " + id));
         }
 
-        return new ResponseEntity<>(planet, HttpStatus.OK);
+        return new ResponseEntity<>(planet.get(), HttpStatus.OK);
     }
 
     @PostMapping
@@ -97,16 +97,15 @@ public class PlanetController {
     public ResponseEntity<?> modifyPlanetByObjectId(@PathVariable ObjectId id, @Valid @RequestBody Planet planet) {
         planet.set_id(id);
 
-        Planet p = planetService.getById(id);
+        Optional<Planet> p = planetService.getById(id);
 
-        ResponseEntity<Response> responseResponseEntity = checkPlanetIdAndReturnNotFound(id, p);
-        if (responseResponseEntity != null){
-            return responseResponseEntity;
+        if (!p.isPresent()){
+            return ResponseEntity.badRequest().body(new Response("Nenhum planeta encontrado com o id: " + id));
         }
 
-        p = planetService.save(planet);
+        planet = planetService.save(p.get());
 
-        if (p == null) {
+        if (planet == null) {
             return new ResponseEntity<Response>(new Response("Erro na atualizacao do planeta " + planet),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -116,11 +115,10 @@ public class PlanetController {
 
     @DeleteMapping("/id/{id}")
     public ResponseEntity<?> deletePlanetByObjectId(@PathVariable ObjectId id) {
-        Planet planet = planetService.getById(id);
+        Optional<Planet> planet = planetService.getById(id);
 
-        ResponseEntity<Response> responseResponseEntity = checkPlanetIdAndReturnNotFound(id, planet);
-        if (responseResponseEntity != null){
-            return responseResponseEntity;
+        if (!planet.isPresent()){
+            return ResponseEntity.badRequest().body(new Response("Nenhum planeta encontrado com o id: " + id));
         }
 
         if(planetService.delete(id)){
@@ -139,14 +137,5 @@ public class PlanetController {
         }
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response("Algum milagre aconteceu e todos os planetas nao foram deletados!"));
-    }
-
-
-    private ResponseEntity<Response> checkPlanetIdAndReturnNotFound(@PathVariable ObjectId id, Planet planet) {
-        if (planet == null) {
-            return new ResponseEntity<Response>(new Response("Nenhum planeta encontrado com o id: " + id),
-                    HttpStatus.NOT_FOUND);
-        }
-        return null;
     }
 }
