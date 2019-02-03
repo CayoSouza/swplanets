@@ -2,8 +2,6 @@ package br.com.b2w.desafio.swplanets.repository;
 
 import br.com.b2w.desafio.swplanets.model.Planet;
 import org.bson.types.ObjectId;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;
@@ -16,5 +14,4 @@ public interface PlanetsRepository extends MongoRepository<Planet, String> {
 
     Optional<List<Planet>> findAllByName(String name);
 
-    Page<Planet> findAllBy(PageRequest pageRequest);
 }
