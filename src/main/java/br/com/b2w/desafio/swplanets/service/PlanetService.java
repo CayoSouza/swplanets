@@ -19,8 +19,6 @@ import java.util.List;
 public class PlanetService {
     @Autowired
     PlanetsRepository planetsRepository;
-    @Autowired
-    NextSequenceService nextSequenceService;
 
    Logger logger = LoggerFactory.getLogger(PlanetService.class);
 
@@ -80,9 +78,4 @@ public class PlanetService {
         }
         return true;
     }
-
-//    public void updatePlanet(Planet planet){
-//        logger.debug("[INFO] Updating planet {}", planet);
-//        planetsRepository.save(planet);
-//    }
 }
