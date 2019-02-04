@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface PlanetsRepository extends MongoRepository<Planet, String> {
+public interface PlanetRepository extends MongoRepository<Planet, String> {
 
     Optional<Planet> findBy_id(ObjectId _id);
 
-    Optional<List<Planet>> findAllByName(String name);
+    List<Planet> findAllByName(String name);
 
 }

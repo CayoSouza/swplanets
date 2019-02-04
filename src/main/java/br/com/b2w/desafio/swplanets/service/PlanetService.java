@@ -1,7 +1,7 @@
 package br.com.b2w.desafio.swplanets.service;
 
 import br.com.b2w.desafio.swplanets.model.Planet;
-import br.com.b2w.desafio.swplanets.repository.PlanetsRepository;
+import br.com.b2w.desafio.swplanets.repository.PlanetRepository;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,13 +19,13 @@ import java.util.Optional;
 @Service
 public class PlanetService {
     @Autowired
-    PlanetsRepository planetsRepository;
+    PlanetRepository planetRepository;
 
    Logger logger = LoggerFactory.getLogger(PlanetService.class);
 
     public List<Planet> getAll(){
         logger.debug("[INFO] Getting all planets.");
-        return planetsRepository.findAll();
+        return planetRepository.findAll();
     }
 
     public Page<Planet> getAllByPageAndSize(int page, int limit, String sort){
@@ -40,28 +40,28 @@ public class PlanetService {
         }
         Pageable pageable = PageRequest.of(page, limit, Sort.by(sort));
         logger.debug("[INFO] Getting planets by page {} and limit {}", page, limit);
-        return planetsRepository.findAll(pageable);
+        return planetRepository.findAll(pageable);
     }
 
     public Optional<Planet> getById(ObjectId id){
         logger.debug("[INFO] Returning planet with _id {}", id);
-        return planetsRepository.findBy_id(id);
+        return planetRepository.findBy_id(id);
     }
 
-    public Optional<List<Planet>> getAllByName(String nome){
+    public List<Planet> getAllByName(String nome){
         logger.debug("[INFO] Returning planets with name {}", nome);
-        return planetsRepository.findAllByName(nome);
+        return planetRepository.findAllByName(nome);
     }
 
     public Planet save(Planet planet){
         logger.debug("[INFO] Saving planet {}", planet);
-        return planetsRepository.save(planet);
+        return planetRepository.save(planet);
     }
 
     public boolean delete(ObjectId id){
         try {
             logger.debug("[INFO] Deleting planet with _id {}", id);
-            planetsRepository.deleteById(id.toHexString());
+            planetRepository.deleteById(id.toHexString());
         } catch (Exception e) {
             logger.error("[ERROR] Error on attempting to delete planet with _id {}", id);
             return false;
@@ -72,7 +72,7 @@ public class PlanetService {
     public boolean deleteAll(){
         try {
             logger.debug("[INFO] Deleting all planets");
-            planetsRepository.deleteAll();
+            planetRepository.deleteAll();
         } catch (Exception e) {
             logger.error("[ERROR] Error attempting to delete all planets.");
             return false;

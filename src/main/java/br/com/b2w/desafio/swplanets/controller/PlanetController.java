@@ -3,6 +3,7 @@ package br.com.b2w.desafio.swplanets.controller;
 import br.com.b2w.desafio.swplanets.model.Planet;
 import br.com.b2w.desafio.swplanets.model.Response;
 import br.com.b2w.desafio.swplanets.service.PlanetService;
+import br.com.b2w.desafio.swplanets.util.ResponseMessage;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/planetas")
@@ -46,7 +48,7 @@ public class PlanetController {
         List<Planet> allPlanets = planetService.getAll();
 
         if (allPlanets.isEmpty()){
-            return new ResponseEntity<Response>(new Response("Nenhum planeta encontrado no banco de dados."),
+            return new ResponseEntity<Response>(new Response(ResponseMessage.NO_PLANET_FOUND.getMessage()),
                     HttpStatus.NOT_FOUND);
         }
 
@@ -54,14 +56,14 @@ public class PlanetController {
     }
 
     public ResponseEntity<?> getPlanetByName(@RequestParam String nome) {
-        Optional<List<Planet>> planetsByName = planetService.getAllByName(nome);
+        List<Planet> planetsByName = planetService.getAllByName(nome);
 
-        if(planetsByName.get().isEmpty()){
-            return new ResponseEntity<Response>(new Response("Nenhum planeta encontrado com o nome: " + nome),
+        if(planetsByName.isEmpty()){
+            return new ResponseEntity<Response>(new Response(ResponseMessage.NO_PLANET_FOUND_BY_NAME.getMessage() + nome),
                     HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(planetsByName.get(), HttpStatus.OK);
+        return new ResponseEntity<>(planetsByName, HttpStatus.OK);
     }
 
     private ResponseEntity<?> getPlanetByPageAndLimit(int page, int size, String sort) {
@@ -74,7 +76,8 @@ public class PlanetController {
         Optional<Planet> planet = planetService.getById(id);
 
         if (!planet.isPresent()){
-            return ResponseEntity.badRequest().body(new Response("Nenhum planeta encontrado com o id: " + id));
+            return new ResponseEntity<Response>(new Response(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + id),
+                    HttpStatus.NOT_FOUND);
         }
 
         return new ResponseEntity<>(planet.get(), HttpStatus.OK);
@@ -100,13 +103,13 @@ public class PlanetController {
         Optional<Planet> p = planetService.getById(id);
 
         if (!p.isPresent()){
-            return ResponseEntity.badRequest().body(new Response("Nenhum planeta encontrado com o id: " + id));
+            return ResponseEntity.badRequest().body(new Response(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + id));
         }
 
         planet = planetService.save(p.get());
 
         if (planet == null) {
-            return new ResponseEntity<Response>(new Response("Erro na atualizacao do planeta " + planet),
+            return new ResponseEntity<Response>(new Response(ResponseMessage.ERROR_UPDATING_PLANET.getMessage() + planet),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
@@ -118,14 +121,14 @@ public class PlanetController {
         Optional<Planet> planet = planetService.getById(id);
 
         if (!planet.isPresent()){
-            return ResponseEntity.badRequest().body(new Response("Nenhum planeta encontrado com o id: " + id));
+            return ResponseEntity.badRequest().body(new Response(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + id));
         }
 
         if(planetService.delete(id)){
-            ResponseEntity.ok().body(new Response(String.format("Planeta %s deletado com sucesso.", id)));
+            ResponseEntity.ok().body(new Response(String.format(ResponseMessage.PLANET_SUCCESSFULLY_DELETED.getMessage(), id)));
         }
 
-        return new ResponseEntity<Response>(new Response("Erro ao deletar o planeta " + id),
+        return new ResponseEntity<Response>(new Response(ResponseMessage.ERROR_DELETING_PLANET.getMessage() + id),
                 HttpStatus.INTERNAL_SERVER_ERROR);
 
     }
@@ -133,9 +136,9 @@ public class PlanetController {
     @DeleteMapping
     public ResponseEntity<Response> deleteAllPlanets() {
         if (planetService.deleteAll()){
-                return ResponseEntity.ok().body(new Response("Todos planetas foram deletados do universo!"));
+                return ResponseEntity.ok().body(new Response(ResponseMessage.ALL_PLANETS_DELETED.getMessage()));
         }
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response("Algum milagre aconteceu e todos os planetas nao foram deletados!"));
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new Response(ResponseMessage.ERROR_DELETING_ALL_PLANETS.getMessage()));
     }
 }
