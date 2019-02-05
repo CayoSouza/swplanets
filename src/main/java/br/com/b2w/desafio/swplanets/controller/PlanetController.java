@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -84,13 +85,13 @@ public class PlanetController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createPlanet(@Valid @RequestBody Planet planet, UriComponentsBuilder uriComponentsBuilder) {
+    public ResponseEntity<?> createPlanet(@Valid @RequestBody Planet planet) {
         ObjectId id = ObjectId.get();
         planet.set_id(id);
-        planetService.save(planet);
+        planet = planetService.save(planet);
 
         headers = new HttpHeaders();
-        uriComponents = uriComponentsBuilder.path("/planetas/{id}").buildAndExpand(id);
+        uriComponents = MvcUriComponentsBuilder.fromController(getClass()).path("/{id}").buildAndExpand(id);
         headers.setLocation(uriComponents.toUri());
 
         return new ResponseEntity<>(planet, headers, HttpStatus.CREATED);
