@@ -97,14 +97,15 @@ public class PlanetController {
         return new ResponseEntity<>(planet, headers, HttpStatus.CREATED);
     }
 
-    @PutMapping("/id/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<?> modifyPlanetByObjectId(@PathVariable ObjectId id, @Valid @RequestBody Planet planet) {
         planet.set_id(id);
 
         Optional<Planet> p = planetService.getById(id);
 
         if (!p.isPresent()){
-            return ResponseEntity.badRequest().body(new Response(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + id));
+            return new ResponseEntity<Response>(new Response(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + id),
+                    HttpStatus.NOT_FOUND);
         }
 
         planet = planetService.save(p.get());
@@ -117,16 +118,17 @@ public class PlanetController {
         return ResponseEntity.ok(p);
     }
 
-    @DeleteMapping("/id/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<?> deletePlanetByObjectId(@PathVariable ObjectId id) {
         Optional<Planet> planet = planetService.getById(id);
 
         if (!planet.isPresent()){
-            return ResponseEntity.badRequest().body(new Response(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + id));
+            return new ResponseEntity<Response>(new Response(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + id),
+                    HttpStatus.NOT_FOUND);
         }
 
         if(planetService.delete(id)){
-            ResponseEntity.ok().body(new Response(String.format(ResponseMessage.PLANET_SUCCESSFULLY_DELETED.getMessage(), id)));
+            return ResponseEntity.ok().body(new Response(ResponseMessage.PLANET_SUCCESSFULLY_DELETED.getMessage() + id));
         }
 
         return new ResponseEntity<Response>(new Response(ResponseMessage.ERROR_DELETING_PLANET.getMessage() + id),

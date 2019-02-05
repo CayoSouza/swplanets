@@ -28,8 +28,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -61,7 +60,7 @@ public class PlanetControllerTest {
     }
 
     @Test
-    public void getPlanetasShouldReturnNotFound() throws Exception {
+    public void getPlanetsShouldReturnNotFound() throws Exception {
         given(planetService.getAll()).willReturn(new ArrayList<Planet>());
 
         mockMvc.perform(get("/planetas"))
@@ -71,7 +70,7 @@ public class PlanetControllerTest {
     }
 
     @Test
-    public void getPlanetasShouldReturnOk() throws Exception {
+    public void getPlanetsShouldReturnOk() throws Exception {
         given(planetService.getAll()).willReturn(planets);
 
         mockMvc.perform(get("/planetas"))
@@ -80,7 +79,7 @@ public class PlanetControllerTest {
     }
 
     @Test
-    public void getPlanetasShouldReturnOkAndManyPlanets() throws Exception {
+    public void getPlanetsShouldReturnOkAndManyPlanets() throws Exception {
         Planet planet2 = new Planet();
         planet2.set_id(ObjectId.get());
         planet2.setName("Planeta2");
@@ -95,17 +94,18 @@ public class PlanetControllerTest {
     }
 
     @Test
-    public void getPlanetasByNameShouldReturnNotFound() throws Exception {
+    public void getPlanetsByNameShouldReturnNotFound() throws Exception {
         given(planetService.getAllByName("placeholder")).willReturn(new ArrayList<>());
 
         final String name = "placeholder";
         mockMvc.perform(get("/planetas").param("nome", name))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(ResponseMessage.NO_PLANET_FOUND_BY_NAME.getMessage() + name));
+                .andExpect(jsonPath("$.message")
+                        .value(ResponseMessage.NO_PLANET_FOUND_BY_NAME.getMessage() + name));
     }
 
     @Test
-    public void getPlanetasByNameShouldReturnOk() throws Exception {
+    public void getPlanetsByNameShouldReturnOk() throws Exception {
         final String nome = "placeholder";
         given(planetService.getAllByName(nome)).willReturn(planets);
 
@@ -115,17 +115,18 @@ public class PlanetControllerTest {
     }
 
     @Test
-    public void getPlanetasByIdShouldReturnNotFound() throws Exception {
+    public void getPlanetByIdShouldReturnNotFound() throws Exception {
         given(planetService.getById(ObjectId.get())).willReturn(Optional.empty());
 
         final ObjectId id = ObjectId.get();
         mockMvc.perform(get("/planetas/{id}", id))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + id));
+                .andExpect(jsonPath("$.message")
+                        .value(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + id));
     }
 
     @Test
-    public void getPlanetasByIdShouldReturnOk() throws Exception {
+    public void getPlanetByIdShouldReturnOk() throws Exception {
         ObjectId id = new ObjectId(planet.get_id());
         given(planetService.getById(id)).willReturn(Optional.of(planet));
 
@@ -135,14 +136,8 @@ public class PlanetControllerTest {
     }
 
     @Test
-    public void createPlanetaShouldReturnCreated() throws Exception {
-        Planet createPlanet = new Planet();
-        createPlanet.set_id(ObjectId.get());
-        createPlanet.setName("PlanetaCriado");
-        createPlanet.setClimate("ClimaCriado");
-        createPlanet.setTerrain("TerrenoCriado");
-        createPlanet.setFilms(Arrays.asList("1","2"));
-        createPlanet.setFilmsApparitions(2);
+    public void createPlanetShouldReturnCreated() throws Exception {
+        Planet createPlanet = setUpAPlanet();
 
         given(planetService.save(any(Planet.class))).willReturn(createPlanet);
 
@@ -154,4 +149,103 @@ public class PlanetControllerTest {
                 .andExpect(jsonPath("$.name").value(createPlanet.getName()));
     }
 
+    @Test
+    public void updatePlanetByIdShouldReturnNotFound() throws Exception {
+        given(planetService.getById(any(ObjectId.class))).willReturn(Optional.empty());
+        Planet createPlanet = setUpAPlanet();
+
+        mockMvc.perform(put("/planetas/{id}", createPlanet.get_id())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(createPlanet)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                        .value(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + createPlanet.get_id()));
+    }
+
+    @Test
+    public void updatePlanetByIdShouldReturnOk() throws Exception {
+        Planet createPlanet = setUpAPlanet();
+        given(planetService.getById(any(ObjectId.class))).willReturn(Optional.of(createPlanet));
+        given(planetService.save(any(Planet.class))).willReturn(createPlanet);
+
+        mockMvc.perform(put("/planetas/{id}", createPlanet.get_id())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(createPlanet)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name")
+                        .value(createPlanet.getName()));
+    }
+
+    @Test
+    public void deletePlanetByIdShouldReturnOk() throws Exception {
+        Planet createPlanet = setUpAPlanet();
+        given(planetService.getById(any(ObjectId.class))).willReturn(Optional.of(createPlanet));
+        given(planetService.delete(any(ObjectId.class))).willReturn(true);
+
+        mockMvc.perform(delete("/planetas/{id}", createPlanet.get_id())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(createPlanet)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message")
+                        .value(ResponseMessage.PLANET_SUCCESSFULLY_DELETED.getMessage() + createPlanet.get_id()));
+    }
+
+    @Test
+    public void deletePlanetByIdShouldReturnNotFound() throws Exception {
+        Planet createPlanet = setUpAPlanet();
+        given(planetService.getById(any(ObjectId.class))).willReturn(Optional.empty());
+
+        mockMvc.perform(delete("/planetas/{id}", createPlanet.get_id())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(createPlanet)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message")
+                        .value(ResponseMessage.NO_PLANET_FOUND_BY_ID.getMessage() + createPlanet.get_id()));
+    }
+
+    @Test
+    public void deletePlanetByIdShouldReturnInternalServerError() throws Exception {
+        Planet createPlanet = setUpAPlanet();
+        given(planetService.getById(any(ObjectId.class))).willReturn(Optional.of(createPlanet));
+        given(planetService.delete(any(ObjectId.class))).willReturn(false);
+
+        mockMvc.perform(delete("/planetas/{id}", createPlanet.get_id())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(gson.toJson(createPlanet)))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message")
+                        .value(ResponseMessage.ERROR_DELETING_PLANET.getMessage() + createPlanet.get_id()));
+    }
+
+    @Test
+    public void deleteAllPlanetsShouldReturnOk() throws Exception {
+        given(planetService.deleteAll()).willReturn(true);
+
+        mockMvc.perform(delete("/planetas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message")
+                        .value(ResponseMessage.ALL_PLANETS_DELETED.getMessage()));
+    }
+
+    @Test
+    public void deleteAllPlanetsShouldReturnInternalServerError() throws Exception {
+        given(planetService.deleteAll()).willReturn(false);
+
+        mockMvc.perform(delete("/planetas"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.message")
+                        .value(ResponseMessage.ERROR_DELETING_ALL_PLANETS.getMessage()));
+    }
+
+    public Planet setUpAPlanet(){
+        Planet createPlanet = new Planet();
+        createPlanet.set_id(ObjectId.get());
+        createPlanet.setName("PlanetaCriado");
+        createPlanet.setClimate("ClimaCriado");
+        createPlanet.setTerrain("TerrenoCriado");
+        createPlanet.setFilms(Arrays.asList("1","2"));
+        createPlanet.setFilmsApparitions(2);
+
+        return createPlanet;
+    }
 }
