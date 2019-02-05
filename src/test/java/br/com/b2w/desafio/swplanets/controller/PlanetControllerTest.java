@@ -1,12 +1,8 @@
 package br.com.b2w.desafio.swplanets.controller;
 
 import br.com.b2w.desafio.swplanets.model.Planet;
-import br.com.b2w.desafio.swplanets.repository.PlanetRepository;
 import br.com.b2w.desafio.swplanets.service.PlanetService;
-import br.com.b2w.desafio.swplanets.service.SwapiService;
-import br.com.b2w.desafio.swplanets.util.Constants;
 import br.com.b2w.desafio.swplanets.util.ResponseMessage;
-import com.fasterxml.jackson.core.JsonParser;
 import com.google.gson.Gson;
 import org.bson.types.ObjectId;
 import org.junit.Before;
@@ -18,8 +14,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,7 +24,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(controllers = PlanetController.class)

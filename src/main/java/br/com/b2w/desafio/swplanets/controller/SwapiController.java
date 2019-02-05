@@ -1,7 +1,6 @@
 package br.com.b2w.desafio.swplanets.controller;
 
 import br.com.b2w.desafio.swplanets.model.Response;
-import br.com.b2w.desafio.swplanets.model.Swapi;
 import br.com.b2w.desafio.swplanets.service.SwapiService;
 import br.com.b2w.desafio.swplanets.util.ResponseMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +14,6 @@ public class SwapiController {
     @Autowired
     SwapiService swapiService;
 
-    @GetMapping("/swapi/consumir")
-    public Swapi consumeSwapi(){
-        return swapiService.getPlanetsFromSwapi();
-    }
 
     @GetMapping("/swapi/importar")
     public ResponseEntity<Response> importaSwapi(){
